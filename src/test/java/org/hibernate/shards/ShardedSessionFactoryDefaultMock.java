@@ -18,13 +18,19 @@
 
 package org.hibernate.shards;
 
+
+import org.hibernate.id.factory.IdentifierGeneratorFactory;
+import org.hibernate.SessionFactoryObserver;
+import org.hibernate.TypeHelper;
+import org.hibernate.type.TypeResolver;
 import org.hibernate.ConnectionReleaseMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.MappingException;
 import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;
-import org.hibernate.cache.Cache;
+import org.hibernate.Cache;
+import org.hibernate.cache.Region;
 import org.hibernate.cache.QueryCache;
 import org.hibernate.cache.UpdateTimestampsCache;
 import org.hibernate.cfg.Settings;
@@ -39,6 +45,7 @@ import org.hibernate.engine.ResultSetMappingDefinition;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.engine.SessionImplementor;
 import org.hibernate.engine.query.QueryPlanCache;
+import org.hibernate.engine.profile.FetchProfile;
 import org.hibernate.exception.SQLExceptionConverter;
 import org.hibernate.id.IdentifierGenerator;
 import org.hibernate.metadata.ClassMetadata;
@@ -62,6 +69,7 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Properties;
 
 /**
  * @author maxr@google.com (Max Ross)
@@ -275,7 +283,7 @@ public class ShardedSessionFactoryDefaultMock implements ShardedSessionFactoryIm
     throw new UnsupportedOperationException();
   }
 
-  public Cache getSecondLevelCacheRegion(String regionName) {
+  public Region getSecondLevelCacheRegion(String regionName) {
     throw new UnsupportedOperationException();
   }
 
@@ -332,6 +340,38 @@ public class ShardedSessionFactoryDefaultMock implements ShardedSessionFactoryIm
   public ShardedSessionFactory getSessionFactory(List<ShardId> shardIds,
       ShardStrategyFactory shardStrategyFactory) {
     throw new UnsupportedOperationException();
+  }
+
+  public TypeHelper getTypeHelper() {
+    throw new UnsupportedOperationException();    
+  }
+  
+  public boolean containsFetchProfileDefinition(String name) {
+    throw new UnsupportedOperationException();    
+  }
+
+  public Cache getCache() {
+    throw new UnsupportedOperationException();    
+  }
+
+  public SessionFactoryObserver getFactoryObserver() {
+    throw new UnsupportedOperationException();    
+  }
+
+  public  FetchProfile 	getFetchProfile(String name) {
+    throw new UnsupportedOperationException();    
+  }
+
+  public Properties getProperties()  {
+    throw new UnsupportedOperationException();    
+  }
+
+  public TypeResolver getTypeResolver() {
+    throw new UnsupportedOperationException();    
+  }
+
+  public IdentifierGeneratorFactory getIdentifierGeneratorFactory(){
+    throw new UnsupportedOperationException();    
   }
 }
 

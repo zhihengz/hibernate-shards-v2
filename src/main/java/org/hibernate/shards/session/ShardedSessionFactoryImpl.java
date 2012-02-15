@@ -26,8 +26,12 @@ import org.hibernate.Interceptor;
 import org.hibernate.MappingException;
 import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;
-import org.hibernate.cache.Cache;
+import org.hibernate.TypeHelper;
+import org.hibernate.Cache;
+import org.hibernate.SessionFactoryObserver;
+import org.hibernate.type.TypeResolver;
 import org.hibernate.cache.QueryCache;
+import org.hibernate.cache.Region;
 import org.hibernate.cache.UpdateTimestampsCache;
 import org.hibernate.cfg.Settings;
 import org.hibernate.classic.Session;
@@ -40,9 +44,11 @@ import org.hibernate.engine.NamedSQLQueryDefinition;
 import org.hibernate.engine.ResultSetMappingDefinition;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.engine.SessionImplementor;
+import org.hibernate.engine.profile.FetchProfile;
 import org.hibernate.engine.query.QueryPlanCache;
 import org.hibernate.exception.SQLExceptionConverter;
 import org.hibernate.id.IdentifierGenerator;
+import org.hibernate.id.factory.IdentifierGeneratorFactory;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.metadata.CollectionMetadata;
 import org.hibernate.persister.collection.CollectionPersister;
@@ -72,6 +78,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Properties;
 
 /**
  * Shard-aware implementation of {@link SessionFactory}.
@@ -355,6 +362,10 @@ public class ShardedSessionFactoryImpl implements ShardedSessionFactoryImplement
     return false;
   }
 
+  public Cache getCache() {
+    return getAnyFactory().getCache();
+  }
+
   public void evict(Class persistentClass) throws HibernateException {
     for(SessionFactory sf : sessionFactories) {
       sf.evict(persistentClass);
@@ -419,6 +430,13 @@ public class ShardedSessionFactoryImpl implements ShardedSessionFactoryImplement
     return getAnyFactory().getFilterDefinition(filterName);
   }
 
+  public boolean containsFetchProfileDefinition(String name) {
+    return getAnyFactory().containsFetchProfileDefinition( name );
+  }
+
+  public TypeHelper getTypeHelper() {
+    return getAnyFactory().getTypeHelper();
+  }
   /**
    * Unsupported.  This is a scope decision, not a technical one.
    */
@@ -430,6 +448,11 @@ public class ShardedSessionFactoryImpl implements ShardedSessionFactoryImplement
   public IdentifierGenerator getIdentifierGenerator(String rootEntityName) {
     // since all configs are same, we return any
     return getAnyFactory().getIdentifierGenerator(rootEntityName);
+  }
+
+  public IdentifierGeneratorFactory getIdentifierGeneratorFactory() {
+    // since all configs are same, we return any
+    return getAnyFactory().getIdentifierGeneratorFactory();
   }
 
   public SessionImplementor openControlSession() {
@@ -599,10 +622,24 @@ public class ShardedSessionFactoryImpl implements ShardedSessionFactoryImplement
     return getAnyFactory().getResultSetMapping(name);
   }
 
-  public Cache getSecondLevelCacheRegion(String regionName) {
-    // assumption is that all session factories are configured the same way,
-    // so it doesn't matter which session factory answers this question
+  public SessionFactoryObserver getFactoryObserver() {
+    return getAnyFactory().getFactoryObserver();
+  }
+  public FetchProfile getFetchProfile(String name) {
+    return getAnyFactory().getFetchProfile(name);
+  }
+
+  public Region getSecondLevelCacheRegion(String regionName ){
     return getAnyFactory().getSecondLevelCacheRegion(regionName);
+  }
+
+  public Properties getProperties() {
+    // TO DO: Shall we merge properties from all factories
+    return getAnyFactory().getProperties();
+  }
+  
+  public TypeResolver getTypeResolver() {
+    return getAnyFactory().getTypeResolver();
   }
 
   public Map getAllSecondLevelCacheRegions() {

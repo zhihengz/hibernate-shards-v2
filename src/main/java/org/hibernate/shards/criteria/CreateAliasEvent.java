@@ -19,6 +19,7 @@
 package org.hibernate.shards.criteria;
 
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.shards.session.ShardedSessionException;
 
 /**
@@ -26,6 +27,7 @@ import org.hibernate.shards.session.ShardedSessionException;
  * @see Criteria#createAlias(String, String)
  * @see Criteria#createAlias(String, String, int)
  * @see Criteria#createAlias(String, String, int) 
+ * @see Criteria#createAlias(String, String, int, Criterion) 
  *
  * @author maxr@google.com (Max Ross)
  */
@@ -33,7 +35,8 @@ class CreateAliasEvent implements CriteriaEvent {
 
   private enum MethodSig {
     ASSOC_PATH_AND_ALIAS,
-    ASSOC_PATH_AND_ALIAS_AND_JOIN_TYPE
+    ASSOC_PATH_AND_ALIAS_AND_JOIN_TYPE,
+    ASSOC_PATH_AND_ALIAS_AND_JOIN_TYPE_AND_CRITERION
   }
 
   // the signature of the createAlias method we're going to invoke when
@@ -49,6 +52,8 @@ class CreateAliasEvent implements CriteriaEvent {
   // the join type - we look at method sig to see if we should use it
   private final Integer joinType;
 
+  private final Criterion criterion;
+
   /**
    * Construct a CreateAliasEvent
    *
@@ -62,11 +67,13 @@ class CreateAliasEvent implements CriteriaEvent {
       MethodSig methodSig,
       String associationPath,
       String alias,
-      /*@Nullable*/Integer joinType) {
+      /*@Nullable*/ Integer joinType,
+      /*@Nullable*/ Criterion criterion) {
     this.methodSig = methodSig;
     this.associationPath = associationPath;
     this.alias = alias;
     this.joinType = joinType;
+    this.criterion = criterion;
   }
 
   /**
@@ -76,7 +83,7 @@ class CreateAliasEvent implements CriteriaEvent {
    * @param alias the name of the alias we're creating.
    */
   public CreateAliasEvent(String associationPath, String alias) {
-    this(MethodSig.ASSOC_PATH_AND_ALIAS, associationPath, alias, null);
+    this(MethodSig.ASSOC_PATH_AND_ALIAS, associationPath, alias, null, null);
   }
 
   /**
@@ -88,7 +95,18 @@ class CreateAliasEvent implements CriteriaEvent {
    */
   public CreateAliasEvent(String associationPath, String alias, int joinType) {
     this(MethodSig.ASSOC_PATH_AND_ALIAS_AND_JOIN_TYPE, associationPath, alias,
-        joinType);
+         joinType, null);
+  }
+  /**
+   * Construct a CreateAliasEvent
+   *
+   * @param associationPath the association path of the alias we're creating.
+   * @param alias the name of the alias we're creating.
+   * @param joinType the join type of the alias we're creating.
+   * @param criterion
+   */
+  public CreateAliasEvent(String associationPath, String alias, int joinType, Criterion criterion ) {
+    this(MethodSig.ASSOC_PATH_AND_ALIAS_AND_JOIN_TYPE, associationPath, alias, joinType, criterion);
   }
 
   public void onEvent(Criteria crit) {
@@ -98,6 +116,9 @@ class CreateAliasEvent implements CriteriaEvent {
         break;
       case ASSOC_PATH_AND_ALIAS_AND_JOIN_TYPE:
         crit.createAlias(associationPath, alias, joinType);
+        break;
+      case ASSOC_PATH_AND_ALIAS_AND_JOIN_TYPE_AND_CRITERION:
+        crit.createAlias(associationPath, alias, joinType,criterion);
         break;
       default:
         throw new ShardedSessionException(

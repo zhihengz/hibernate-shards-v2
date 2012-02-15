@@ -249,6 +249,23 @@ public class ShardedCriteriaImpl implements ShardedCriteria {
     return this;
   }
 
+  public Criteria createAlias(String associationPath, 
+                              String alias,
+                              int joinType,
+                              Criterion criterion) 
+    throws HibernateException {
+    CriteriaEvent event = new CreateAliasEvent(associationPath, alias, joinType, criterion);
+    for (Shard shard : shards) {
+      if (shard.getCriteriaById(criteriaId) != null) {
+        shard.getCriteriaById(criteriaId)
+          .createAlias(associationPath, alias, joinType, criterion);
+      } else {
+        shard.addCriteriaEvent(criteriaId, event);
+      }
+    }
+    return this;
+  }
+
   private static final Iterable<CriteriaEvent> NO_CRITERIA_EVENTS =
       Collections.unmodifiableList(new ArrayList<CriteriaEvent>());
 
@@ -309,6 +326,14 @@ public class ShardedCriteriaImpl implements ShardedCriteria {
     return createSubcriteria(factory, associationPath);
   }
 
+  public Criteria createCriteria( String associationPath, 
+                                  String alias, 
+                                  int joinType, 
+                                  Criterion withClause )
+    throws HibernateException {
+    SubcriteriaFactory factory = new SubcriteriaFactoryImpl( associationPath, alias, joinType, withClause );
+    return createSubcriteria(factory, associationPath);
+  }
   public Criteria setResultTransformer(ResultTransformer resultTransformer) {
     CriteriaEvent event = new SetResultTransformerEvent(resultTransformer);
     for (Shard shard : shards) {
@@ -395,6 +420,45 @@ public class ShardedCriteriaImpl implements ShardedCriteria {
       }
     }
     return this;
+  }
+
+  public Criteria setReadOnly( boolean readonly ) {
+
+    CriteriaEvent event = new SetReadOnlyEvent(readonly);
+    for (Shard shard : shards) {
+      if (shard.getCriteriaById(criteriaId) != null) {
+        shard.getCriteriaById(criteriaId).setReadOnly(readonly);
+      } else {
+        shard.addCriteriaEvent(criteriaId, event);
+      }
+    }
+    return this;
+  }
+
+  public boolean isReadOnly() {
+    boolean readOnly = true;
+    for (Shard shard : shards) {
+      if (shard.getCriteriaById(criteriaId) != null ) {
+        if ( !shard.getCriteriaById(criteriaId).isReadOnly() ) {
+          //any one shard is not read only, we return false as a whole
+          return false;
+        }
+      } 
+    }
+    return true;
+  }
+
+  public boolean isReadOnlyInitialized() {
+    boolean readOnly = true;
+    for (Shard shard : shards) {
+      if (shard.getCriteriaById(criteriaId) != null ) {
+        if ( !shard.getCriteriaById(criteriaId).isReadOnlyInitialized() ) {
+          //any one shard is not read only, we return false as a whole
+          return false;
+        }
+      } 
+    }
+    return true;
   }
 
   public Criteria setCacheRegion(String cacheRegion) {
@@ -511,4 +575,5 @@ public class ShardedCriteriaImpl implements ShardedCriteria {
             new FirstNonNullResultExitStrategy<Object>(),
             criteriaCollector);
   }
+
 }

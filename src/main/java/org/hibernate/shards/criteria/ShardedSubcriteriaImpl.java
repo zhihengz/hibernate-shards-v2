@@ -223,6 +223,20 @@ class ShardedSubcriteriaImpl implements ShardedSubcriteria {
     return this;
   }
 
+  public Criteria createAlias(String associationPath, String alias,
+                              int joinType, Criterion criterion) 
+    throws HibernateException {
+    CriteriaEvent event = new CreateAliasEvent(associationPath, alias, joinType, criterion);
+    for (Shard shard : shards) {
+      if (shardToCriteriaMap.get(shard) != null) {
+        shardToCriteriaMap.get(shard).createAlias(associationPath, alias, joinType, criterion);
+      } else {
+        shardToEventListMap.get(shard).add(event);
+      }
+    }
+    return this;
+  }
+
   public Criteria setResultTransformer(ResultTransformer resultTransformer) {
     CriteriaEvent event = new SetResultTransformerEvent(resultTransformer);
     for (Shard shard : shards) {
@@ -280,6 +294,46 @@ class ShardedSubcriteriaImpl implements ShardedSubcriteria {
     }
     return this;
   }
+
+  public Criteria setReadOnly( boolean readonly ) {
+
+    CriteriaEvent event = new SetReadOnlyEvent(readonly);
+    for (Shard shard : shards) {
+      if (shardToCriteriaMap.get(shard) != null) {
+        shardToCriteriaMap.get(shard).setReadOnly(readonly);
+      } else {
+        shardToEventListMap.get(shard).add(event);
+      }
+    }
+    return this;
+  }
+
+  public boolean isReadOnly() {
+    boolean readOnly = true;
+    for (Shard shard : shards) {
+      if (shardToCriteriaMap.get(shard) != null ) {
+        if ( !shardToCriteriaMap.get(shard).isReadOnly() ) {
+          //any one shard is not read only, we return false as a whole
+          return false;
+        }
+      } 
+    }
+    return true;
+  }
+
+  public boolean isReadOnlyInitialized() {
+    boolean readOnly = true;
+    for (Shard shard : shards) {
+      if (shardToCriteriaMap.get(shard) != null ) {
+        if ( !shardToCriteriaMap.get(shard).isReadOnlyInitialized() ) {
+          //any one shard is not read only, we return false as a whole
+          return false;
+        }
+      } 
+    }
+    return true;
+  }
+
 
   public Criteria setCacheRegion(String cacheRegion) {
     CriteriaEvent event = new SetCacheRegionEvent(cacheRegion);
@@ -408,6 +462,12 @@ class ShardedSubcriteriaImpl implements ShardedSubcriteria {
   public Criteria createCriteria(String associationPath, String alias,
       int joinType) throws HibernateException {
     SubcriteriaFactory factory = new SubcriteriaFactoryImpl(associationPath, alias, joinType);
+    return createSubcriteria(factory, associationPath);
+  }
+  public Criteria createCriteria(String associationPath, String alias,
+                                 int joinType, Criterion criterion ) 
+    throws HibernateException {
+    SubcriteriaFactory factory = new SubcriteriaFactoryImpl(associationPath, alias, joinType, criterion);
     return createSubcriteria(factory, associationPath);
   }
 

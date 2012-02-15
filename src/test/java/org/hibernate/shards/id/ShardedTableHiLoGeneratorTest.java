@@ -28,6 +28,8 @@ import org.hibernate.Transaction;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.engine.EntityKey;
 import org.hibernate.engine.PersistenceContext;
+import org.hibernate.engine.NonFlushedChanges;
+import org.hibernate.engine.LoadQueryInfluencers;
 import org.hibernate.engine.QueryParameters;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.engine.SessionImplementor;
@@ -80,6 +82,20 @@ public class ShardedTableHiLoGeneratorTest extends TestCase {
       return null;
     }
 
+    public LoadQueryInfluencers getLoadQueryInfluencers() {
+
+      throw new UnsupportedOperationException();
+    }
+
+    public void applyNonFlushedChanges( NonFlushedChanges change ) {
+      
+      throw new UnsupportedOperationException();
+    }
+
+    public NonFlushedChanges getNonFlushedChanges( ) {
+      
+      throw new UnsupportedOperationException();
+    }
     public Interceptor getInterceptor() {
       throw new UnsupportedOperationException();
     }

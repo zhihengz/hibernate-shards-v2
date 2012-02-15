@@ -22,6 +22,7 @@ import org.hibernate.EntityMode;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.SessionImplementor;
 import org.hibernate.metadata.ClassMetadata;
+import org.hibernate.engine.SessionImplementor;
 import org.hibernate.type.Type;
 
 import java.io.Serializable;
@@ -114,6 +115,11 @@ public class ClassMetadataDefaultMock implements ClassMetadata {
     throw new UnsupportedOperationException();
   }
 
+  public Object instantiate(Serializable id, SessionImplementor session)
+      throws HibernateException {
+    throw new UnsupportedOperationException();
+  }
+
   public Object getPropertyValue(Object object, String propertyName,
       EntityMode entityMode) throws HibernateException {
     throw new UnsupportedOperationException();
@@ -154,6 +160,14 @@ public class ClassMetadataDefaultMock implements ClassMetadata {
 
   public Object getVersion(Object object, EntityMode entityMode)
       throws HibernateException {
+    throw new UnsupportedOperationException();
+  }
+
+  public void setIdentifier(Object object, Serializable id, SessionImplementor implementor){
+    throw new UnsupportedOperationException();
+  }
+
+  public Serializable getIdentifier(Object object, SessionImplementor implementor){
     throw new UnsupportedOperationException();
   }
 }

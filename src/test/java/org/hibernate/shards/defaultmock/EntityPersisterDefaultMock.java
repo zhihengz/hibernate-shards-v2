@@ -21,8 +21,10 @@ package org.hibernate.shards.defaultmock;
 import org.hibernate.EntityMode;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
+import org.hibernate.LockOptions;
 import org.hibernate.MappingException;
 import org.hibernate.cache.CacheConcurrencyStrategy;
+import org.hibernate.cache.access.EntityRegionAccessStrategy;
 import org.hibernate.cache.entry.CacheEntryStructure;
 import org.hibernate.engine.CascadeStyle;
 import org.hibernate.engine.SessionFactoryImplementor;
@@ -169,8 +171,18 @@ public class EntityPersisterDefaultMock implements EntityPersister {
     throw new UnsupportedOperationException();
   }
 
+  public Object load(Serializable id, Object optionalObject, LockOptions lockOptions,
+      SessionImplementor session) throws HibernateException {
+    throw new UnsupportedOperationException();
+  }
+
   public void lock(Serializable id, Object version, Object object,
       LockMode lockMode, SessionImplementor session) throws HibernateException {
+    throw new UnsupportedOperationException();
+  }
+
+  public void lock(Serializable id, Object version, Object object,
+      LockOptions lockOptions, SessionImplementor session) throws HibernateException {
     throw new UnsupportedOperationException();
   }
 
@@ -395,8 +407,18 @@ public class EntityPersisterDefaultMock implements EntityPersister {
     throw new UnsupportedOperationException();
   }
 
+  public Serializable getIdentifier(Object object, SessionImplementor implementor)
+      throws HibernateException {
+    throw new UnsupportedOperationException();
+  }
+
   public void setIdentifier(Object object, Serializable id,
       EntityMode entityMode) throws HibernateException {
+    throw new UnsupportedOperationException();
+  }
+
+  public void setIdentifier(Object object, Serializable id,
+      SessionImplementor implementor) throws HibernateException {
     throw new UnsupportedOperationException();
   }
 
@@ -406,6 +428,11 @@ public class EntityPersisterDefaultMock implements EntityPersister {
   }
 
   public Object instantiate(Serializable id, EntityMode entityMode)
+      throws HibernateException {
+    throw new UnsupportedOperationException();
+  }
+
+  public Object instantiate(Serializable id, SessionImplementor implementor)
       throws HibernateException {
     throw new UnsupportedOperationException();
   }
@@ -423,6 +450,10 @@ public class EntityPersisterDefaultMock implements EntityPersister {
       Object currentVersion, EntityMode entityMode) {
     throw new UnsupportedOperationException();
   }
+  public void resetIdentifier(Object entity, Serializable currentId,
+      Object currentVersion, SessionImplementor implemen) {
+    throw new UnsupportedOperationException();
+  }
 
   public EntityPersister getSubclassEntityPersister(Object instance,
       SessionFactoryImplementor factory, EntityMode entityMode) {
@@ -438,6 +469,10 @@ public class EntityPersisterDefaultMock implements EntityPersister {
   }
 
   public ValueInclusion[] getPropertyUpdateGenerationInclusions() {
+    throw new UnsupportedOperationException();
+  }
+    
+  public EntityRegionAccessStrategy 	getCacheAccessStrategy()  {
     throw new UnsupportedOperationException();
   }
 }
