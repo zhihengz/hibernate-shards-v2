@@ -135,11 +135,13 @@ public abstract class BaseShardingIntegrationTestCase extends TestCase implement
 
   private Configuration buildPrototypeConfig() {
     DatabasePlatform dbPlatform = DatabasePlatformFactory.FACTORY.getDatabasePlatform();
-    String dbPlatformConfigDirectory = "platform/" + dbPlatform.getName().toLowerCase() +"/config/";
+    String dbPlatformConfigDirectory = "org/hibernate/shards/integration/platform/" + dbPlatform.getName().toLowerCase() +"/config/";
     IdGenType idGenType = getIdGenType();
     Configuration config = createPrototypeConfiguration();
-    config.configure(BaseShardingIntegrationTestCase.class.getResource(dbPlatformConfigDirectory + "shard0.hibernate.cfg.xml"));
-    config.addURL(BaseShardingIntegrationTestCase.class.getResource(dbPlatformConfigDirectory + idGenType.getMappingFile()));
+    //    config.configure(BaseShardingIntegrationTestCase.class.getResource(dbPlatformConfigDirectory + "shard0.hibernate.cfg.xml"));
+    config.configure( dbPlatformConfigDirectory + "shard0.hibernate.cfg.xml" );
+    config.addResource( dbPlatformConfigDirectory + idGenType.getMappingFile() );
+    //    config.addURL(BaseShardingIntegrationTestCase.class.getResource(dbPlatformConfigDirectory + idGenType.getMappingFile()));
     return config;
   }
 

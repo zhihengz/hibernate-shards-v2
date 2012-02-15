@@ -14,6 +14,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.apache.ant</groupId>
+      <artifactId>ant-junit</artifactId>
+      <version>1.8.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>hibernate</groupId>
       <artifactId>hibernate</artifactId>
       <version>3.2.6.GA</version>
@@ -29,6 +35,12 @@
       <version>1.6.1</version>
     </dependency>  
     <dependency>
+      <groupId>antlr</groupId>
+      <artifactId>antlr</artifactId>
+      <version>2.7.6</version>
+      <scope>provided</scope>
+    </dependency>  
+    <dependency>
       <groupId>cglib</groupId>
       <artifactId>cglib</artifactId>
       <version>2.2</version>
@@ -37,6 +49,12 @@
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
       <version>1.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>2.1.1</version>
+      <scope>provided</scope>
     </dependency>
   <dependency>
       <groupId>hsqldb</groupId>
