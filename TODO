@@ -1,0 +1,5 @@
+- use jmock instead of hand coded mock objects
+- use javassist instead of cglib in all testing cases
+- AvgResultsExitOperationTest skipped testAvgProjectionComesBackAsDouble, need reevaluation
+- ModelCriteriaPermutedIntegrationTest testAvgProjection() 
+- ModelPermutedIntegrationTest testSavingOneToOneChildWithoutAssociationFails()
