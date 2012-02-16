@@ -259,7 +259,7 @@ public class ModelPermutedIntegrationTest extends BaseShardingIntegrationTestCas
    * In this test we demonstrate that if you try to save an entity that doesn't
    * support top-level saves before associating some other object with that
    * entity, you'll get an exception.
-   */
+   
   public void testSavingOneToOneChildWithoutAssociationFails() {
     session.beginTransaction();
     Escalator esc = escalator(null, null);
