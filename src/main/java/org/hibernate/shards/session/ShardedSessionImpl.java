@@ -28,12 +28,17 @@ import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.LockMode;
+import org.hibernate.LockOptions;
 import org.hibernate.Query;
 import org.hibernate.ReplicationMode;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionException;
 import org.hibernate.Transaction;
+import org.hibernate.LobHelper;
+import org.hibernate.TypeHelper;
+import org.hibernate.Session.LockRequest;
 import org.hibernate.TransientObjectException;
+import org.hibernate.UnknownProfileException;
 import org.hibernate.UnresolvableObjectException;
 import org.hibernate.classic.Session;
 import org.hibernate.engine.SessionFactoryImplementor;
@@ -41,6 +46,7 @@ import org.hibernate.engine.SessionImplementor;
 import org.hibernate.id.IdentifierGenerator;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.jdbc.Work;
 import org.hibernate.shards.CrossShardAssociationException;
 import org.hibernate.shards.Shard;
 import org.hibernate.shards.ShardId;
@@ -294,6 +300,21 @@ public class ShardedSessionImpl implements ShardedSession, ShardedSessionImpleme
     return applyGetOperation(shardOp, new ShardResolutionStrategyDataImpl(clazz, id));
   }
 
+  public Object get(final Class clazz, final Serializable id, final LockOptions lockOptions)
+      throws HibernateException {
+    ShardOperation<Object> shardOp = new ShardOperation<Object>() {
+      public Object execute(Shard shard) {
+        return shard.establishSession().get(clazz, id, lockOptions);
+      }
+
+      public String getOperationName() {
+        return "get(Class class, Serializable id, LockMode lockMode)";
+      }
+    };
+    // we're not letting people customize shard selection by lockMode
+    return applyGetOperation(shardOp, new ShardResolutionStrategyDataImpl(clazz, id));
+  }
+
   public Object get(final String entityName, final Serializable id)
       throws HibernateException {
     ShardOperation<Object> shardOp = new ShardOperation<Object>() {
@@ -324,6 +345,29 @@ public class ShardedSessionImpl implements ShardedSession, ShardedSessionImpleme
     return applyGetOperation(shardOp, new ShardResolutionStrategyDataImpl(entityName, id));
   }
 
+  public Object get(final String entityName, final Serializable id, final LockOptions lockOptions)
+      throws HibernateException {
+    ShardOperation<Object> shardOp = new ShardOperation<Object>() {
+      public Object execute(Shard shard) {
+        return shard.establishSession().get(entityName, id, lockOptions);
+      }
+
+      public String getOperationName() {
+        return "get(String entityName, Serializable id, LockMode lockMode)";
+      }
+
+    };
+    // we're not letting people customize shard selection by lockMode
+    return applyGetOperation(shardOp, new ShardResolutionStrategyDataImpl(entityName, id));
+  }
+
+  private Session getAnySession() {
+    Session someSession = getSomeSession();
+    if ( someSession == null ) {
+      return shards.get(0).establishSession();
+    }
+    return someSession;
+  }
   private Session getSomeSession() {
     for (Shard shard : shards) {
       if (shard.getSession() != null) {
@@ -347,6 +391,43 @@ public class ShardedSessionImpl implements ShardedSession, ShardedSessionImpleme
    */
   public Session getSession(EntityMode entityMode) {
     throw new UnsupportedOperationException();
+  }
+
+  public boolean isFetchProfileEnabled(String name) throws UnknownProfileException {
+    return getAnySession().isFetchProfileEnabled(name);
+  }
+  public void disableFetchProfile(String profileName) throws UnknownProfileException {
+
+    DisableFetchProfileOpenSessionEvent event = new DisableFetchProfileOpenSessionEvent(profileName);
+    for (Shard shard : shards) {
+      if (shard.getSession() != null) {
+        shard.getSession().disableFetchProfile(profileName);
+      } else {
+        shard.addOpenSessionEvent(event);
+      }
+    }
+
+  }
+
+  public void enableFetchProfile(String profileName) throws UnknownProfileException {
+
+    EnableFetchProfileOpenSessionEvent event = new EnableFetchProfileOpenSessionEvent(profileName);
+    for (Shard shard : shards) {
+      if (shard.getSession() != null) {
+        shard.getSession().enableFetchProfile(profileName);
+      } else {
+        shard.addOpenSessionEvent(event);
+      }
+    }
+
+  }
+
+  public LobHelper getLobHelper() {
+    return getAnySession().getLobHelper();
+  }
+
+  public TypeHelper getTypeHelper() {
+    return getAnySession().getTypeHelper();
   }
 
   public void flush() throws HibernateException {
@@ -411,6 +492,9 @@ public class ShardedSessionImpl implements ShardedSession, ShardedSessionImpleme
     throw new UnsupportedOperationException();
   }
 
+  public void doWork(Work work) throws HibernateException {
+    throw new UnsupportedOperationException();
+  }
   public Connection close() throws HibernateException {
     List<Throwable> thrown = null;
     for (Shard shard : shards) {
@@ -516,6 +600,15 @@ public class ShardedSessionImpl implements ShardedSession, ShardedSessionImpleme
     }
   }
 
+  public boolean isReadOnly(Object entityOrProxy) {
+    return getAnySession().isReadOnly(entityOrProxy);
+  }
+
+  public boolean isDefaultReadOnly() {
+    return getAnySession().isDefaultReadOnly();
+  }
+
+
   public Object load(Class clazz, Serializable id, LockMode lockMode)
       throws HibernateException {
     List<ShardId> shardIds = selectShardIdsFromShardResolutionStrategyData(new
@@ -561,12 +654,42 @@ public class ShardedSessionImpl implements ShardedSession, ShardedSessionImpleme
     }
   }
 
+  public Object load(Class clazz, Serializable id, LockOptions lockOptions)
+      throws HibernateException {
+    List<ShardId> shardIds = selectShardIdsFromShardResolutionStrategyData(new
+                                 ShardResolutionStrategyDataImpl(clazz, id));
+    if (shardIds.size() == 1) {
+      return shardIdsToShards.get(shardIds.get(0)).establishSession().load(clazz, id, lockOptions);
+    } else {
+      Object result = get(clazz, id);
+      if (result == null) {
+        shardedSessionFactory.getEntityNotFoundDelegate().handleEntityNotFound(clazz.getName(), id);
+      }
+      return result;
+    }
+  }
+
   public Object load(String entityName, Serializable id)
       throws HibernateException {
     List<ShardId> shardIds = selectShardIdsFromShardResolutionStrategyData(new
                                  ShardResolutionStrategyDataImpl(entityName, id));
     if (shardIds.size() == 1) {
       return shardIdsToShards.get(shardIds.get(0)).establishSession().load(entityName, id);
+    } else {
+      Object result = get(entityName, id);
+      if (result == null) {
+        shardedSessionFactory.getEntityNotFoundDelegate().handleEntityNotFound(entityName, id);
+      }
+      return result;
+    }
+  }
+
+  public Object load(String entityName, Serializable id, LockOptions lockOptions)
+      throws HibernateException {
+    List<ShardId> shardIds = selectShardIdsFromShardResolutionStrategyData(new
+                                 ShardResolutionStrategyDataImpl(entityName, id));
+    if (shardIds.size() == 1) {
+      return shardIdsToShards.get(shardIds.get(0)).establishSession().load(entityName, id, lockOptions);
     } else {
       Object result = get(entityName, id);
       if (result == null) {
@@ -1025,6 +1148,9 @@ public class ShardedSessionImpl implements ShardedSession, ShardedSessionImpleme
     invokeOnShardWithObject(op, object);
   }
 
+  public LockRequest buildLockRequest( LockOptions lockOptions ) {
+    return new ShardedLockRequest( this, lockOptions );
+  }
   private interface RefreshOperation {
     void refresh(Shard shard, Object object);
   }
@@ -1065,6 +1191,16 @@ public class ShardedSessionImpl implements ShardedSession, ShardedSessionImpleme
     RefreshOperation op = new RefreshOperation() {
       public void refresh(Shard shard, Object object) {
         shard.establishSession().refresh(object, lockMode);
+      }
+    };
+    applyRefreshOperation(op, object);
+  }
+
+  public void refresh(final Object object, final LockOptions lockOptions)
+      throws HibernateException {
+    RefreshOperation op = new RefreshOperation() {
+      public void refresh(Shard shard, Object object) {
+        shard.establishSession().refresh(object, lockOptions);
       }
     };
     applyRefreshOperation(op, object);
@@ -1247,6 +1383,17 @@ public class ShardedSessionImpl implements ShardedSession, ShardedSessionImpleme
     for (Shard shard : shards) {
       if (shard.getSession() != null) {
         shard.getSession().setReadOnly(entity, readOnly);
+      } else {
+        shard.addOpenSessionEvent(event);
+      }
+    }
+  }
+
+  public void setDefaultReadOnly(boolean readOnly) {
+    SetDefaultReadOnlyOpenSessionEvent event = new SetDefaultReadOnlyOpenSessionEvent(readOnly);
+    for (Shard shard : shards) {
+      if (shard.getSession() != null) {
+        shard.getSession().setDefaultReadOnly(readOnly);
       } else {
         shard.addOpenSessionEvent(event);
       }
@@ -1600,6 +1747,47 @@ public class ShardedSessionImpl implements ShardedSession, ShardedSessionImpleme
     return so.execute(shardToUse);
   }
 
+  static class ShardedLockRequest implements LockRequest {
 
+    private LockOptions lockOptions;
+    private ShardedSessionImpl impl;
+    public ShardedLockRequest( ShardedSessionImpl impl, LockOptions lockOptions ) {
+      this.lockOptions = lockOptions;
+      this.impl = impl;
+    }
+    public LockMode getLockMode() {
+      return lockOptions.getLockMode();
+    }
+
+    public boolean getScope() {
+      return lockOptions.getScope();
+    }
+
+    public int getTimeOut() {
+      return lockOptions.getTimeOut();
+    }
+
+    public LockRequest setLockMode( LockMode lockMode) {
+      this.lockOptions.setLockMode(lockMode);
+      return this;
+    }
+
+    public LockRequest setScope( boolean scope ) {
+      this.lockOptions.setScope(scope);
+      return this;
+    }
+    
+    public LockRequest setTimeOut( int timeout ) {
+      this.lockOptions.setTimeOut( timeout);
+      return this;
+    }
+
+    public void lock(Object object) {
+      impl.lock(object, getLockMode() );
+    }
+    public void lock(String entityName, Object object ) {
+      impl.lock( entityName, object, getLockMode() );
+    }
+  }
 
 }

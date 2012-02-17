@@ -194,6 +194,8 @@ public class ShardedConfiguration {
    */
   @SuppressWarnings("unchecked")
   private Set<Class<?>> determineClassesWithoutTopLevelSaveSupport(Configuration config) {
+    //ensure mapping is built already since hibernate is lazy in nature
+    config.buildMappings();
     Set<Class<?>> classesWithoutTopLevelSaveSupport = Sets.newHashSet();
     for(Iterator<PersistentClass> pcIter = config.getClassMappings(); pcIter.hasNext(); ) {
       PersistentClass pc = pcIter.next();

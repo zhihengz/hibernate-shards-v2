@@ -22,6 +22,7 @@ import junit.framework.TestCase;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
+import org.hibernate.cfg.Mappings;
 import org.hibernate.dialect.HSQLDialect;
 import org.hibernate.mapping.ManyToOne;
 import org.hibernate.mapping.OneToOne;
@@ -34,6 +35,7 @@ import org.hibernate.shards.strategy.ShardStrategy;
 import org.hibernate.shards.strategy.ShardStrategyFactoryDefaultMock;
 import org.hibernate.shards.util.Lists;
 
+import org.jmock.*;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,6 +47,7 @@ public class ShardedConfigurationTest extends TestCase {
   private MyShardStrategyFactory shardStrategyFactory;
   private ShardConfiguration shardConfig;
   private ShardedConfiguration shardedConfiguration;
+  private Mockery context = new Mockery();
 
   @Override
   protected void setUp() throws Exception {
@@ -109,12 +112,13 @@ public class ShardedConfigurationTest extends TestCase {
   }
 
   public void testRequiresShardLock() {
+    Mappings mockMappings = context.mock( Mappings.class );
     Property property = new Property();
     assertFalse(shardedConfiguration.doesNotSupportTopLevelSave(property));
-    ManyToOne mto = new ManyToOne(new Table());
+    ManyToOne mto = new ManyToOne(mockMappings, new Table());
     property.setValue(mto);
     assertFalse(shardedConfiguration.doesNotSupportTopLevelSave(property));
-    OneToOne oto = new OneToOne(new Table(), new RootClass());
+    OneToOne oto = new OneToOne(mockMappings, new Table(), new RootClass());
     property.setValue(oto);
     assertTrue(shardedConfiguration.doesNotSupportTopLevelSave(property));
   }

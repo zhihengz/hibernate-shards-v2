@@ -85,6 +85,11 @@ public class ShardedCriteriaDefaultMock implements ShardedCriteria {
     throw new UnsupportedOperationException();
   }
 
+  public Criteria createAlias(String associationPath, String alias,
+                              int joinType, Criterion criterion ) throws HibernateException {
+    throw new UnsupportedOperationException();
+  }
+
   public Criteria createCriteria(String associationPath)
       throws HibernateException {
     throw new UnsupportedOperationException();
@@ -102,6 +107,10 @@ public class ShardedCriteriaDefaultMock implements ShardedCriteria {
 
   public Criteria createCriteria(String associationPath, String alias,
       int joinType) throws HibernateException {
+    throw new UnsupportedOperationException();
+  }
+  public Criteria createCriteria(String associationPath, String alias,
+                                 int joinType, Criterion criterion) throws HibernateException {
     throw new UnsupportedOperationException();
   }
 
@@ -161,4 +170,17 @@ public class ShardedCriteriaDefaultMock implements ShardedCriteria {
   public Object uniqueResult() throws HibernateException {
     throw new UnsupportedOperationException();
   }
+
+  public Criteria setReadOnly( boolean readOnly){
+    throw new UnsupportedOperationException();
+  }
+
+  public boolean isReadOnly( ){
+    throw new UnsupportedOperationException();
+  }
+
+  public boolean isReadOnlyInitialized( ){
+    throw new UnsupportedOperationException();
+  }
+
 }

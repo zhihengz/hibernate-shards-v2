@@ -22,6 +22,7 @@ import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
+import org.hibernate.LockOptions;
 import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -274,6 +275,30 @@ public class ShardedQueryImpl implements ShardedQuery {
     for (Shard shard : shards) {
       if (shard.getQueryById(queryId) != null) {
         shard.getQueryById(queryId).setReadOnly(readOnly);
+      } else {
+        shard.addQueryEvent(queryId, event);
+      }
+    }
+    return this;
+  }
+
+  public boolean isReadOnly() {
+    boolean readOnly = true;
+    for (Shard shard : shards) {
+      if (shard.getQueryById(queryId) != null ) {
+        if ( !shard.getQueryById(queryId).isReadOnly() ) {
+          //any one shard is not read only, we return false as a whole
+          return false;
+        }
+      } 
+    }
+    return true;
+  }
+  public Query setLockOptions(LockOptions lockOptions) {
+    QueryEvent event = new SetLockOptionsEvent(lockOptions);
+    for (Shard shard : shards) {
+      if (shard.getQueryById(queryId) != null) {
+        shard.getQueryById(queryId).setLockOptions(lockOptions);
       } else {
         shard.addQueryEvent(queryId, event);
       }

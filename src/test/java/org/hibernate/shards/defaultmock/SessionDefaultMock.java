@@ -18,6 +18,8 @@
 
 package org.hibernate.shards.defaultmock;
 
+import org.hibernate.LobHelper;
+import org.hibernate.TypeHelper;
 import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.EntityMode;
@@ -25,6 +27,7 @@ import org.hibernate.Filter;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
+import org.hibernate.LockOptions;
 import org.hibernate.Query;
 import org.hibernate.ReplicationMode;
 import org.hibernate.SQLQuery;
@@ -33,6 +36,7 @@ import org.hibernate.Transaction;
 import org.hibernate.classic.Session;
 import org.hibernate.stat.SessionStatistics;
 import org.hibernate.type.Type;
+import org.hibernate.jdbc.Work;
 
 import java.io.Serializable;
 import java.sql.Connection;
@@ -266,6 +270,10 @@ public class SessionDefaultMock implements Session {
     throw new UnsupportedOperationException();
   }
 
+  public boolean isReadOnly(Object entity) {
+    throw new UnsupportedOperationException();
+  }
+
   public boolean isConnected() {
     throw new UnsupportedOperationException();
   }
@@ -291,7 +299,17 @@ public class SessionDefaultMock implements Session {
     throw new UnsupportedOperationException();
   }
 
+  public Object load(Class theClass, Serializable id, LockOptions lockOptions)
+      throws HibernateException {
+    throw new UnsupportedOperationException();
+  }
+
   public Object load(String entityName, Serializable id, LockMode lockMode)
+      throws HibernateException {
+    throw new UnsupportedOperationException();
+  }
+
+  public Object load(String entityName, Serializable id, LockOptions lockOptions)
       throws HibernateException {
     throw new UnsupportedOperationException();
   }
@@ -383,11 +401,20 @@ public class SessionDefaultMock implements Session {
     throw new UnsupportedOperationException();
   }
 
+  public Session.LockRequest buildLockRequest( LockOptions lockOptions ) {
+    throw new UnsupportedOperationException();
+  }
+
   public void refresh(Object object) throws HibernateException {
     throw new UnsupportedOperationException();
   }
 
   public void refresh(Object object, LockMode lockMode)
+      throws HibernateException {
+    throw new UnsupportedOperationException();
+  }
+
+  public void refresh(Object object, LockOptions lockOptions)
       throws HibernateException {
     throw new UnsupportedOperationException();
   }
@@ -449,6 +476,10 @@ public class SessionDefaultMock implements Session {
       throws HibernateException {
     throw new UnsupportedOperationException();
   }
+  public Object get(Class clazz, Serializable id, LockOptions lockOptions)
+      throws HibernateException {
+    throw new UnsupportedOperationException();
+  }
 
   public Object get(String entityName, Serializable id)
       throws HibernateException {
@@ -456,6 +487,10 @@ public class SessionDefaultMock implements Session {
   }
 
   public Object get(String entityName, Serializable id, LockMode lockMode)
+      throws HibernateException {
+    throw new UnsupportedOperationException();
+  }
+  public Object get(String entityName, Serializable id, LockOptions lockOptions)
       throws HibernateException {
     throw new UnsupportedOperationException();
   }
@@ -484,6 +519,14 @@ public class SessionDefaultMock implements Session {
     throw new UnsupportedOperationException();
   }
 
+  public void setDefaultReadOnly(boolean readOnly) {
+    throw new UnsupportedOperationException();
+  }
+
+  public boolean isDefaultReadOnly() {
+    throw new UnsupportedOperationException();
+  }
+
   public Connection disconnect() throws HibernateException {
     throw new UnsupportedOperationException();
   }
@@ -495,7 +538,33 @@ public class SessionDefaultMock implements Session {
     throw new UnsupportedOperationException();
   }
 
+  public void disableFetchProfile(String name) throws HibernateException {
+    throw new UnsupportedOperationException();
+  }
+
+  public void enableFetchProfile(String name) throws HibernateException {
+    throw new UnsupportedOperationException();
+  }
+
   public void reconnect(Connection connection) throws HibernateException {
     throw new UnsupportedOperationException();
   }
+
+  public LobHelper getLobHelper() {
+    throw new UnsupportedOperationException();
+  }
+
+  public TypeHelper getTypeHelper() {
+    throw new UnsupportedOperationException();
+  }
+
+  public boolean isFetchProfileEnabled(String name) {
+    throw new UnsupportedOperationException();
+  }
+
+  public void doWork(Work work) {
+    throw new UnsupportedOperationException();
+  }
+
+  
 }

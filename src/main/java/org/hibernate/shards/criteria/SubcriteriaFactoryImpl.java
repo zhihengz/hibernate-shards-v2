@@ -19,6 +19,7 @@
 package org.hibernate.shards.criteria;
 
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.shards.session.ShardedSessionException;
 
 /**
@@ -37,7 +38,9 @@ public class SubcriteriaFactoryImpl implements SubcriteriaFactory {
     ASSOCIATION,
     ASSOCIATION_AND_JOIN_TYPE,
     ASSOCIATION_AND_ALIAS,
-    ASSOCIATION_AND_ALIAS_AND_JOIN_TYPE
+    ASSOCIATION_AND_ALIAS_AND_JOIN_TYPE,
+    ASSOCIATION_AND_ALIAS_AND_JOIN_TYPE_AND_CRITERION
+  
   }
 
   // used to tell us which overload of createCriteria to invoke
@@ -52,6 +55,7 @@ public class SubcriteriaFactoryImpl implements SubcriteriaFactory {
   // the alias we'll pass to createCriteria.  Can be null.
   private final String alias;
 
+  private final Criterion criterion;
   /**
    * Construct a SubcriteriaFactoryImpl
    *
@@ -59,16 +63,19 @@ public class SubcriteriaFactoryImpl implements SubcriteriaFactory {
    * @param association the association we'll pass to createCriteria
    * @param joinType the join type we'll pass to createCriteria.  Can be null.
    * @param alias the alias we'll pass to createCriteria.  Can be null.
+   * @param criterion
    */
   private SubcriteriaFactoryImpl(
       MethodSig methodSig,
       String association,
       /*@Nullable*/ int joinType,
-      /*@Nullable*/ String alias) {
+      /*@Nullable*/ String alias,
+      /*@Nullable*/ Criterion criterion) {
     this.methodSig = methodSig;
     this.association = association;
     this.joinType = joinType;
     this.alias = alias;
+    this.criterion = criterion;
   }
 
   /**
@@ -77,7 +84,7 @@ public class SubcriteriaFactoryImpl implements SubcriteriaFactory {
    * @param association the association we'll pass to createCriteria
    */
   public SubcriteriaFactoryImpl(String association) {
-    this(MethodSig.ASSOCIATION, association, 0, null);
+    this(MethodSig.ASSOCIATION, association, 0, null, null);
   }
 
   /**
@@ -87,7 +94,7 @@ public class SubcriteriaFactoryImpl implements SubcriteriaFactory {
    * @param joinType the join type we'll pass to createCriteria
    */
   public SubcriteriaFactoryImpl(String association, int joinType) {
-    this(MethodSig.ASSOCIATION_AND_JOIN_TYPE, association, joinType, null);
+    this(MethodSig.ASSOCIATION_AND_JOIN_TYPE, association, joinType, null, null);
   }
 
   /**
@@ -97,7 +104,7 @@ public class SubcriteriaFactoryImpl implements SubcriteriaFactory {
    * @param alias the alias we'll pass to createCriteria
    */
   public SubcriteriaFactoryImpl(String association, String alias) {
-    this(MethodSig.ASSOCIATION_AND_ALIAS, association, 0, alias);
+    this(MethodSig.ASSOCIATION_AND_ALIAS, association, 0, alias, null);
   }
 
   /**
@@ -108,7 +115,11 @@ public class SubcriteriaFactoryImpl implements SubcriteriaFactory {
    * @param joinType the join type we'll pass to createCriteria
    */
   public SubcriteriaFactoryImpl(String association, String alias, int joinType) {
-    this(MethodSig.ASSOCIATION_AND_ALIAS_AND_JOIN_TYPE, association, joinType, alias);
+    this(MethodSig.ASSOCIATION_AND_ALIAS_AND_JOIN_TYPE, association, joinType, alias, null);
+  }
+
+  public SubcriteriaFactoryImpl(String association, String alias, int joinType, Criterion criterion ) {
+    this(MethodSig.ASSOCIATION_AND_ALIAS_AND_JOIN_TYPE_AND_CRITERION, association, joinType, alias, criterion);
   }
 
   public Criteria createSubcriteria(Criteria parent, Iterable<CriteriaEvent> events) {
@@ -126,6 +137,9 @@ public class SubcriteriaFactoryImpl implements SubcriteriaFactory {
         break;
       case ASSOCIATION_AND_ALIAS_AND_JOIN_TYPE:
         crit = parent.createCriteria(association, alias, joinType);
+        break;
+      case ASSOCIATION_AND_ALIAS_AND_JOIN_TYPE_AND_CRITERION:
+        crit = parent.createCriteria(association, alias, joinType, criterion);
         break;
       default:
         throw new ShardedSessionException(

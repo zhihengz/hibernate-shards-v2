@@ -29,6 +29,7 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Transaction;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.engine.EntityKey;
+import org.hibernate.engine.LoadQueryInfluencers;
 import org.hibernate.engine.PersistenceContext;
 import org.hibernate.engine.QueryParameters;
 import org.hibernate.engine.SessionFactoryImplementor;
@@ -41,6 +42,7 @@ import org.hibernate.jdbc.JDBCContext;
 import org.hibernate.loader.custom.CustomQuery;
 import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.type.Type;
+import org.hibernate.engine.NonFlushedChanges;
 
 import java.io.Serializable;
 import java.sql.Connection;
@@ -282,4 +284,17 @@ public class SessionImplementorDefaultMock implements SessionImplementor {
   public boolean isClosed() {
     throw new UnsupportedOperationException();
   }
+
+  public LoadQueryInfluencers getLoadQueryInfluencers() {
+    throw new UnsupportedOperationException();
+  }
+
+  public void applyNonFlushedChanges( NonFlushedChanges changes) {
+    throw new UnsupportedOperationException();
+  }
+
+  public NonFlushedChanges getNonFlushedChanges() {
+    throw new UnsupportedOperationException();
+  }
+
 }

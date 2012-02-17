@@ -22,6 +22,7 @@ import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
+import org.hibernate.LockOptions;
 import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -341,6 +342,14 @@ public class QueryDefaultMock implements Query {
   }
 
   public Query setProperties(Map bean) throws HibernateException {
+    throw new UnsupportedOperationException();
+  }
+
+  public Query setLockOptions( LockOptions lockOptions ) {
+    throw new UnsupportedOperationException();
+  }
+
+  public boolean isReadOnly() {
     throw new UnsupportedOperationException();
   }
 }
