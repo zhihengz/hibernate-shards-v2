@@ -184,7 +184,7 @@ public abstract class BaseShardingIntegrationTestCase extends TestCase implement
   }
 
   protected void resetSession() {
-    MemoryLeakPlugger.plug((ShardedSessionImpl)session);
+    session.clear();
     session.close();
     session = openSession();
   }
@@ -198,7 +198,7 @@ public abstract class BaseShardingIntegrationTestCase extends TestCase implement
 
     try {
       if(session != null) {
-        MemoryLeakPlugger.plug((ShardedSessionImpl)session);
+        session.clear();
         session.close();
         session = null;
       }
