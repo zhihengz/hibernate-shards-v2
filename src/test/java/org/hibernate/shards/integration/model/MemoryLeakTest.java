@@ -25,7 +25,6 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.engine.StatefulPersistenceContext;
 import org.hibernate.impl.SessionImpl;
 import org.hibernate.shards.integration.IdGenType;
-import org.hibernate.shards.integration.MemoryLeakPlugger;
 import static org.hibernate.shards.integration.model.ModelDataFactory.person;
 import static org.hibernate.shards.integration.model.ModelDataFactory.tenant;
 import org.hibernate.shards.integration.platform.DatabasePlatform;
@@ -104,7 +103,7 @@ public class MemoryLeakTest extends TestCase {
   @Override
   protected void tearDown() throws Exception {
     try {
-      MemoryLeakPlugger.plug((SessionImpl)session);
+      session.clear();
       session.close();
     } finally {
       sf.close();
@@ -138,6 +137,5 @@ public class MemoryLeakTest extends TestCase {
       f.setAccessible(isAccessible);
     }
 
-    MemoryLeakPlugger.plug((SessionImpl)session);
   }
 }

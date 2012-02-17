@@ -28,7 +28,6 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.shards.ShardId;
 import org.hibernate.shards.integration.BaseShardingIntegrationTestCase;
-import org.hibernate.shards.integration.MemoryLeakPlugger;
 import static org.hibernate.shards.integration.model.ModelDataFactory.building;
 import static org.hibernate.shards.integration.model.ModelDataFactory.elevator;
 import static org.hibernate.shards.integration.model.ModelDataFactory.escalator;
@@ -693,7 +692,7 @@ public class ModelPermutedIntegrationTest extends BaseShardingIntegrationTestCas
     }
 
     // clean up memory for this new unrecorded session
-    MemoryLeakPlugger.plug((ShardedSessionImpl) sessionWithParticularShards);
+    sessionWithParticularShards.clear();
     sessionWithParticularShards.close();
   }
 
