@@ -1,1 +1,7 @@
 Maybe I can revive hibernate shards ?
+
+status
+======
+
+- mavenized the project code base, all docs are left behind
+- updated the hibernate dependency from 3.2 to 3.6.9, a couple of fixes due to api change
