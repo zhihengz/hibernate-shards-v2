@@ -238,15 +238,13 @@ public class ModelCriteriaPermutedIntegrationTest extends BaseShardingIntegratio
     assertEquals(2, total);
   }
 
-    /**
-     * somehow I cannot figure out why this one get Long vs. Integer issues
   public void testAvgProjection() {
     Criteria crit = session.createCriteria(Floor.class).setProjection(Projections.avg("squareFeet"));
     List<Double> result = list(crit);
     assertEquals(1, result.size());
     assertEquals(20.0, result.get(0));
   }
-    **/
+
   public void testMaxResults() throws Exception {
     Criteria crit = session.createCriteria(Building.class).setMaxResults(1);
     assertEquals(1, list(crit).size());

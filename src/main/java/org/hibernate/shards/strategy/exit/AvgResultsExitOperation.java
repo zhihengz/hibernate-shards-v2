@@ -45,7 +45,7 @@ public class AvgResultsExitOperation implements ExitOperation {
   public List<Object> apply(List<Object> results) {
     List<Object> nonNullResults = ExitOperationUtils.getNonNullList(results);
     Double total = null;
-    int numResults = 0;
+    long numResults = 0;
     for(Object result : nonNullResults) {
       /**
        * We expect all entries to be Object arrays.
@@ -53,7 +53,7 @@ public class AvgResultsExitOperation implements ExitOperation {
        * the second entry in the array is the number of rows that were examined
        * to arrive at the average.
        */
-      Pair<Double, Integer> pair = getResultPair(result);
+      Pair<Double, Number> pair = getResultPair(result);
       Double shardAvg = pair.first;
       if(shardAvg == null) {
         // if there's no result from this shard it doesn't go into the
@@ -61,7 +61,7 @@ public class AvgResultsExitOperation implements ExitOperation {
         // in the database
         continue;
       }
-      int shardResults = pair.second;
+      long shardResults = pair.second.longValue();
       Double shardTotal = shardAvg * shardResults;
       if(total == null) {
         total = shardTotal;
@@ -76,7 +76,7 @@ public class AvgResultsExitOperation implements ExitOperation {
     return Collections.<Object>singletonList(total / numResults);
   }
 
-  private Pair<Double, Integer> getResultPair(Object result) {
+  private Pair<Double, Number> getResultPair(Object result) {
     if(!(result instanceof Object[])) {
       final String msg =
           "Wrong type in result list.  Expected " + Object[].class +
@@ -92,6 +92,6 @@ public class AvgResultsExitOperation implements ExitOperation {
       log.error(msg);
       throw new IllegalStateException(msg);
     }
-    return Pair.of((Double) resultArr[0], (Integer) resultArr[1]);
+    return Pair.of((Double) resultArr[0], (Number) resultArr[1]);
   }
 }
